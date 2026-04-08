@@ -29,7 +29,7 @@ export const demos: DemoVideo[] = [
     description: "经典影视片段：华强与瓜摊老板之间关于西瓜的一场精彩博弈。",
     videoUrl: hfUrl("华强买瓜.mp4"),
     thumbnailUrl: "",
-    tags: ["影视", "对话", "经典"],
+    tags: ["VQA", "影视", "对话", "经典"],
     questions: [
       {
         id: "hq-q1",
@@ -60,12 +60,28 @@ export const demos: DemoVideo[] = [
     ],
   },
   {
+    id: "dakaimen",
+    title: "大开门",
+    description: "一段关于「大开门」的精彩视频片段。",
+    videoUrl: hfUrl("大开门.mp4"),
+    thumbnailUrl: "",
+    tags: ["Temporal Grounding", "生活", "趣味"],
+    questions: [
+      {
+        id: "dk-q1",
+        text: "视频中猫咪一共被喂食了几次，具体时间是？",
+        answer:
+          "猫咪一共被喂食了五次。第一次在00:03，第二次在00:12，第三次在00:18，第四次在00:27，第五次在00:37。",
+      },
+    ],
+  },
+  {
     id: "taishi-luroufan",
     title: "台式卤肉饭",
-    description: "一段关于「大开门」的精彩视频片段。",
+    description: "一段关于「台式卤肉饭」的制作教程。",
     videoUrl: hfUrl("台式卤肉饭.mp4"),
     thumbnailUrl: "",
-    tags: ["生活", "菜谱"],
+    tags: ["Temporal Grounding", "生活", "菜谱"],
     questions: [
       {
         id: "dk-q1",
@@ -76,28 +92,12 @@ export const demos: DemoVideo[] = [
     ],
   },
   {
-    id: "jiaogei",
-    title: "浇给",
-    description: "一段趣味十足的「浇给」名场面。",
-    videoUrl: hfUrl("浇给.mp4"),
-    thumbnailUrl: "",
-    tags: ["趣味", "名场面"],
-    questions: [
-      {
-        id: "jg-q1",
-        text: "视频中人物一共吃了几次洋葱，分别在视频的哪个时间段吃的",
-        answer:
-          "根据视频内容，人物在视频中一共吃了三次洋葱，具体时间点如下：第一次是在01:01至01:05之间，第二次是在01:27至01:30之间，第三次是在01:39至01:41之间。 答案：三次。第一次在01:01至01:05之间，第二次在01:27至01:30之间，第三次在01:39至01:41之间。",
-      },
-    ],
-  },
-  {
     id: "luoge-slap",
     title: "罗哥扇耳光",
     description: "一段经典的「罗哥扇耳光」名场面，展现了精彩的表演张力。",
     videoUrl: hfUrl("罗哥扇耳光.mp4"),
     thumbnailUrl: "",
-    tags: ["影视", "经典", "名场面"],
+    tags: ["VQA", "影视", "经典", "名场面"],
     questions: [
       {
         id: "lg-q1",
