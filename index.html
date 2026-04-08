@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/moss-vl-logo-textless.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <title>Video Understanding Demo</title>
+  </head>
+  <body class="min-h-screen text-gray-800 antialiased font-sans m-0 p-0 relative overflow-x-hidden sunshine-bg">
+    <div id="app" class="relative z-10"></div>
+    <!-- Dynamic light bubbles will be injected by Vue or CSS -->
+    <div class="bubbles-container pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <!-- Bubbles HTML added here for simple CSS animation -->
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+      <div class="bubble"></div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

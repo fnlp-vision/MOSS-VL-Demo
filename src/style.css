@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(16, 185, 129, 0.3);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(16, 185, 129, 0.5);
+  }
+  
+  body {
+    /* Emerald/leaf green surroundings, light green/white center */
+    background: radial-gradient(circle at top center, #f0fdf4 0%, #dcfce7 40%, #34d399 70%, #10b981 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+}
+
+/* Light Bubbles Animation */
+.bubbles-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.bubble {
+  position: absolute;
+  bottom: -100px;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.1) 60%, transparent 100%);
+  border-radius: 50%;
+  animation: float 15s infinite ease-in;
+  opacity: 0.6;
+  filter: blur(2px);
+}
+
+.bubble:nth-child(1) { left: 10%; width: 80px; height: 80px; animation-duration: 12s; }
+.bubble:nth-child(2) { left: 30%; width: 40px; height: 40px; animation-duration: 8s; animation-delay: 2s; }
+.bubble:nth-child(3) { left: 50%; width: 120px; height: 120px; animation-duration: 18s; animation-delay: 4s; filter: blur(4px); }
+.bubble:nth-child(4) { left: 70%; width: 60px; height: 60px; animation-duration: 10s; animation-delay: 1s; }
+.bubble:nth-child(5) { left: 85%; width: 90px; height: 90px; animation-duration: 14s; animation-delay: 5s; }
+.bubble:nth-child(6) { left: 20%; width: 50px; height: 50px; animation-duration: 9s; animation-delay: 3s; }
+.bubble:nth-child(7) { left: 60%; width: 70px; height: 70px; animation-duration: 11s; animation-delay: 6s; }
+.bubble:nth-child(8) { left: 95%; width: 100px; height: 100px; animation-duration: 16s; animation-delay: 7s; filter: blur(3px); }
+
+@keyframes float {
+  0% {
+    transform: translateY(0) scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.6;
+  }
+  80% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-120vh) scale(1.2);
+    opacity: 0;
+  }
+}
