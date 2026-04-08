@@ -35,7 +35,7 @@ export const demos: DemoVideo[] = [
     type: "video",
     videoUrl: hfUrl("华强买瓜.mp4"),
     thumbnailUrl: "",
-    tags: ["VQA", "ZH", "影视", "对话", "经典"],
+    tags: ["VQA", "ZH", "影视", "经典"],
     questions: [
       {
         id: "hq-q1",
@@ -54,12 +54,6 @@ export const demos: DemoVideo[] = [
         text: "从视频中看，可以从哪个时间点的内容看出来主角的电动车的车牌号？",
         answer:
           "从时间01:43开始到01:47结束，持续了大约4秒。",
-      },
-      {
-        id: "hq-q4",
-        text: "从该时间点，识别主角电动车的车牌号是多少？",
-        answer:
-          "E7168",
       },
     ],
   },
@@ -105,7 +99,7 @@ export const demos: DemoVideo[] = [
     type: "video",
     videoUrl: hfUrl("罗哥扇耳光.mp4"),
     thumbnailUrl: "",
-    tags: ["VQA", "ZH", "影视", "经典", "名场面"],
+    tags: ["VQA", "ZH", "影视", "名场面"],
     questions: [
       {
         id: "lg-q1",
@@ -250,7 +244,7 @@ export const demos: DemoVideo[] = [
     type: "ocr",
     imageUrl: hfUrl("玫珑瓜.png"),
     thumbnailUrl: "",
-    tags: ["OCR", "ZH", "Grounding", "生活", "广告"],
+    tags: ["OCR", "ZH", "Grounding", "广告"],
     questions: [
       {
         id: "mlg-q1",
