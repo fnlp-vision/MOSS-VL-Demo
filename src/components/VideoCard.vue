@@ -14,7 +14,7 @@ defineProps<{
     <div class="relative aspect-video overflow-hidden bg-emerald-900/10">
       <!-- Image type -->
       <img
-        v-if="video.type === 'image'"
+        v-if="video.type === 'image' || video.type === 'ocr'"
         :src="video.thumbnailUrl || video.imageUrl"
         :alt="video.title"
         class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -51,11 +51,32 @@ defineProps<{
           class="flex h-14 w-14 scale-0 items-center justify-center rounded-full bg-white/95 text-emerald-600 shadow-lg transition-transform duration-300 group-hover:scale-100"
         >
           <svg
+            v-if="!video.type || video.type === 'video'"
             class="ml-1 h-6 w-6"
             fill="currentColor"
             viewBox="0 0 24 24"
           >
             <path d="M8 5v14l11-7z" />
+          </svg>
+          <svg
+            v-else-if="video.type === 'image' || video.type === 'ocr'"
+            class="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <svg
+            v-else-if="video.type === 'multi-image'"
+            class="h-6 w-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
           </svg>
         </div>
       </div>

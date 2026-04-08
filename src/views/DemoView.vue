@@ -10,6 +10,7 @@ const props = defineProps<{
 }>();
 
 const router = useRouter();
+const chatPanelRef = ref<InstanceType<typeof ChatPanel> | null>(null);
 
 const video = computed(() => demos.find((v) => v.id === props.id));
 
@@ -77,74 +78,109 @@ function stopDrag() {
     <!-- Increased width to 80vw, constrained by max-width if needed -->
     <div 
       id="demo-container" 
-      class="flex w-[85vw] min-w-[1000px] flex-col lg:flex-row bg-white/70 backdrop-blur-xl rounded-3xl shadow-2xl border border-emerald-200 overflow-hidden" 
+      class="flex w-[85vw] min-w-[1000px] flex-col lg:flex-row bg-white/70 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-emerald-200 overflow-hidden" 
       style="height: 85vh; max-height: 900px;"
       :style="isDragging ? 'cursor: col-resize; user-select: none;' : ''"
     >
       
-      <!-- Left: Video Panel -->
-      <div 
-        class="flex flex-col border-b border-emerald-100 lg:border-b-0 bg-emerald-50/30"
-        :style="{ width: `${leftPanelWidth}%` }"
+  <!-- Image or Multi-Image: Just Chat Panel full width -->
+  <div v-if="video.type === 'image' || video.type === 'multi-image'" class="flex h-full w-full flex-col relative">
+    <div class="px-5 pt-5 sm:px-8 sm:pt-8 pb-4 shrink-0 flex items-center z-10 bg-white/40">
+      <button
+        class="flex w-fit items-center gap-2 text-sm font-medium text-emerald-600 transition hover:text-emerald-800 bg-white/50 px-4 py-2 rounded-full border border-emerald-100 hover:bg-white hover:shadow-md"
+        @click="goBack"
       >
-        <div class="flex-1 overflow-y-auto p-5 lg:p-8 flex flex-col">
-          <!-- Back to gallery button at the very top -->
-          <div class="mb-6 flex shrink-0">
-            <button
-              class="flex w-fit items-center gap-2 text-sm font-medium text-emerald-600 transition hover:text-emerald-800 bg-white/50 px-4 py-2 rounded-full border border-emerald-100 hover:bg-white"
-              @click="goBack"
-            >
-              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-              </svg>
-              Back to gallery
-            </button>
-          </div>
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to gallery
+      </button>
+    </div>
 
-          <!-- Centered Video Player -->
-          <div class="flex-1 flex flex-col justify-center">
-          <VideoPlayer
-            :src="video.type === 'image' ? (video.imageUrl || '') : (video.videoUrl || '')"
-            :imageUrls="video.imageUrls"
-            :poster="video.thumbnailUrl || ''"
-            :title="video.title"
-            :type="video.type || 'video'"
-          />
-          </div>
+    <!-- Chat Container without the extra wrapping block -->
+    <div class="flex-1 overflow-hidden w-full flex flex-col bg-white/40">
+      <ChatPanel ref="chatPanelRef" :questions="video.questions" :auto-start="true" />
+    </div>
+  </div>
 
-          <!-- Caption and Tags at the bottom -->
-          <div class="mt-8 shrink-0">
-            <p class="text-base leading-relaxed text-gray-700">
-              {{ video.description }}
-            </p>
+        <!-- Video: Split layout with Player and Chat -->
+        <div v-else class="flex h-full w-full flex-col lg:flex-row">
+          <!-- Left: Video Panel -->
+          <div 
+            class="flex flex-col border-b border-emerald-100 lg:border-b-0 bg-emerald-50/30"
+            :style="{ width: `${leftPanelWidth}%` }"
+          >
+            <div class="flex-1 overflow-y-auto p-5 lg:p-8 flex flex-col">
+              <!-- Back to gallery button at the very top -->
+              <div class="mb-6 flex shrink-0">
+                <button
+                  class="flex w-fit items-center gap-2 text-sm font-medium text-emerald-600 transition hover:text-emerald-800 bg-white/50 px-4 py-2 rounded-full border border-emerald-100 hover:bg-white hover:shadow-md"
+                  @click="goBack"
+                >
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+                  </svg>
+                  Back to gallery
+                </button>
+              </div>
 
-            <div class="mt-4 flex flex-wrap gap-2">
-              <span
-                v-for="tag in video.tags"
-                :key="tag"
-                class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 border border-emerald-200"
-              >
-                {{ tag }}
-              </span>
+              <!-- Centered Video Player or OCR Image Viewer -->
+              <div class="flex-1 flex flex-col justify-center">
+              <VideoPlayer
+                :src="video.type === 'ocr' ? (video.imageUrl || '') : (video.videoUrl || '')"
+                :poster="video.thumbnailUrl || ''"
+                :title="video.title"
+                :type="video.type"
+                :ocrData="video.type === 'ocr' && video.questions.length > 0 ? (() => {
+                  const data: Record<string, string> = {};
+                  try {
+                    const lines = video.questions[0].answer.split('\n');
+                    for (const line of lines) {
+                      // Remove HTML entities and extract key-value
+                      const cleanLine = line.replace(/&quot;/g, '').replace(/&#34;/g, '');
+                      const match = cleanLine.match(/^(.*?):\s*(\[.*?\])/);
+                      if (match) data[match[1]] = match[2];
+                    }
+                  } catch(e) {}
+                  return data;
+                })() : undefined"
+              />
+              </div>
+
+              <!-- Caption and Tags at the bottom -->
+              <div class="mt-8 shrink-0">
+                <p class="text-base leading-relaxed text-gray-700">
+                  {{ video.description }}
+                </p>
+
+                <div class="mt-4 flex flex-wrap gap-2">
+                  <span
+                    v-for="tag in video.tags"
+                    :key="tag"
+                    class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 border border-emerald-200"
+                  >
+                    {{ tag }}
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Resizer Split Line -->
+          <div 
+            class="hidden lg:flex w-1.5 shrink-0 cursor-col-resize flex-col items-center justify-center bg-emerald-100 hover:bg-emerald-300 active:bg-emerald-400 transition-colors z-10"
+            @mousedown.prevent="startDrag"
+            @touchstart.prevent="startDrag"
+          >
+            <!-- Visual handle indicator -->
+            <div class="h-10 w-0.5 rounded-full bg-emerald-400/50 pointer-events-none"></div>
+          </div>
+
+          <!-- Right: Chat Panel -->
+          <div class="flex min-h-0 flex-1 flex-col bg-white/40">
+            <ChatPanel :questions="video.questions" />
+          </div>
         </div>
-      </div>
-
-      <!-- Resizer Split Line -->
-      <div 
-        class="hidden lg:flex w-1.5 shrink-0 cursor-col-resize flex-col items-center justify-center bg-emerald-100 hover:bg-emerald-300 active:bg-emerald-400 transition-colors z-10"
-        @mousedown.prevent="startDrag"
-        @touchstart.prevent="startDrag"
-      >
-        <!-- Visual handle indicator -->
-        <div class="h-10 w-0.5 rounded-full bg-emerald-400/50 pointer-events-none"></div>
-      </div>
-
-      <!-- Right: Chat Panel -->
-      <div class="flex min-h-0 flex-1 flex-col bg-white/40">
-        <ChatPanel :questions="video.questions" />
-      </div>
     </div>
   </div>
 </template>

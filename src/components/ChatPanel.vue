@@ -8,10 +8,12 @@ interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   isTyping?: boolean;
+  images?: string[];
 }
 
 const props = defineProps<{
   questions: DemoQuestion[];
+  autoStart?: boolean;
 }>();
 
 const messages = ref<ChatMessage[]>([]);
@@ -28,15 +30,37 @@ watch(() => props.questions, () => {
 }, { immediate: true });
 
 function resetChat() {
-  messages.value = [];
+  if (typeTimer) {
+    clearInterval(typeTimer);
+    typeTimer = null;
+  }
   isTyping.value = false;
   hasStarted.value = false;
   activeQuestion.value = null;
   usedQuestionIds.value.clear();
   currentQuestions.value = [...props.questions];
-  if (typeTimer) {
-    clearInterval(typeTimer);
-    typeTimer = null;
+
+  if (props.autoStart && props.questions.length > 0) {
+    // For auto-start, instantly render all questions and answers statically
+    const initialMessages: ChatMessage[] = [];
+    props.questions.forEach(q => {
+      usedQuestionIds.value.add(q.id);
+      initialMessages.push({
+        role: "user",
+        content: q.text,
+        images: q.images
+      });
+      initialMessages.push({
+        role: "assistant",
+        content: q.answer,
+        isTyping: false
+      });
+    });
+    messages.value = initialMessages;
+    hasStarted.value = true;
+    currentQuestions.value = [];
+  } else {
+    messages.value = [];
   }
 }
 
@@ -52,7 +76,7 @@ function renderMarkdown(text: string): string {
   return marked.parse(text, { async: false }) as string;
 }
 
-function askQuestion(question: DemoQuestion) {
+function askQuestion(question: DemoQuestion, instant: boolean = false) {
   if (isTyping.value) return;
 
   usedQuestionIds.value.add(question.id);
@@ -64,9 +88,21 @@ function askQuestion(question: DemoQuestion) {
   messages.value.push({
     role: "user",
     content: question.text,
+    images: question.images
   });
 
   scrollToBottom();
+
+  if (instant) {
+    messages.value.push({
+      role: "assistant",
+      content: question.answer,
+      isTyping: false,
+    });
+    currentQuestions.value = props.questions.filter((q) => !usedQuestionIds.value.has(q.id));
+    scrollToBottom();
+    return;
+  }
 
   messages.value.push({
     role: "assistant",
@@ -122,7 +158,7 @@ onBeforeUnmount(() => {
   if (typeTimer) clearInterval(typeTimer);
 });
 
-defineExpose({ askQuestion });
+defineExpose({ askQuestion, resetChat });
 </script>
 
 <template>
@@ -130,11 +166,11 @@ defineExpose({ askQuestion });
     <!-- Messages area -->
     <div
       ref="chatContainer"
-      class="flex-1 space-y-6 overflow-y-auto px-5 py-6 bg-white/50 backdrop-blur-sm"
+      class="flex-1 space-y-6 overflow-y-auto px-5 py-6 sm:px-8 sm:py-8 bg-white/50 backdrop-blur-sm"
     >
       <!-- Welcome message -->
       <div
-        v-if="messages.length === 0"
+        v-if="messages.length === 0 && !props.autoStart"
         class="flex h-full items-center justify-center animate-fade-in"
       >
         <div class="text-center">
@@ -155,7 +191,9 @@ defineExpose({ askQuestion });
               />
             </svg>
           </div>
-          <h3 class="mb-2 font-bold text-gray-800">Ask the Video</h3>
+          <h3 class="mb-2 font-bold text-gray-800">
+            {{ props.autoStart ? 'Ask the Image' : 'Ask the Video' }}
+          </h3>
           <p class="text-sm font-medium text-gray-500">
             Click a question below to see the model's response
           </p>
@@ -171,9 +209,24 @@ defineExpose({ askQuestion });
         <!-- User message -->
         <div v-if="msg.role === 'user'" class="flex justify-end">
           <div
-            class="prose-user max-w-[85%] rounded-3xl rounded-tr-md bg-emerald-600 px-5 py-3 text-base font-medium text-white shadow-md border border-emerald-500/50"
-            v-html="renderMarkdown(msg.content)"
-          />
+            class="prose-user max-w-[85%] flex flex-col items-end gap-3"
+          >
+            <!-- Render images attached to user message -->
+            <div v-if="msg.images && msg.images.length > 0" class="flex flex-wrap justify-end gap-3">
+              <img 
+                v-for="(img, imgIdx) in msg.images" 
+                :key="imgIdx" 
+                :src="img" 
+                class="max-h-64 max-w-full rounded-[1.25rem] border-4 border-emerald-500 shadow-xl object-contain bg-black/5" 
+                loading="lazy" 
+              />
+            </div>
+            
+            <div 
+              class="rounded-[1.5rem] rounded-tr-md bg-emerald-600 px-6 py-4 text-[1.05rem] font-medium text-white shadow-md border border-emerald-500/50"
+              v-html="renderMarkdown(msg.content)"
+            />
+          </div>
         </div>
 
         <!-- Assistant message -->
@@ -192,16 +245,29 @@ defineExpose({ askQuestion });
               />
             </div>
             <div
-              class="prose-assistant max-w-none rounded-3xl rounded-tl-md border border-emerald-100 bg-white/90 px-6 py-4 text-base leading-relaxed text-gray-800 shadow-sm"
+              class="prose-assistant max-w-none rounded-[1.5rem] rounded-tl-md border border-emerald-100 bg-white/95 px-7 py-5 text-[1.05rem] leading-[1.8] text-gray-800 shadow-sm"
               v-html="renderMarkdown(msg.content)"
-            />
+            >
+            </div>
+            <div v-if="msg.images && msg.images.length > 0" class="mt-3 flex flex-wrap gap-2">
+              <img 
+                v-for="(img, imgIdx) in msg.images" 
+                :key="imgIdx" 
+                :src="img" 
+                class="max-h-48 rounded-xl border border-emerald-100 shadow-sm object-contain" 
+                loading="lazy" 
+              />
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Action Area (Questions & Controls) floating at the bottom -->
-    <div class="border-t border-emerald-100 bg-white/70 backdrop-blur-md px-5 py-4 shadow-[0_-4px_10px_rgba(0,0,0,0.02)] min-h-[96px] flex flex-col justify-center">
+    <div 
+      v-if="!props.autoStart"
+      class="border-t border-emerald-100 bg-white/70 backdrop-blur-md px-5 py-4 sm:px-8 sm:py-5 shadow-[0_-4px_10px_rgba(0,0,0,0.02)] min-h-[96px] flex flex-col justify-center"
+    >
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         
         <!-- Left: Questions or Status -->
@@ -254,7 +320,7 @@ defineExpose({ askQuestion });
         </div>
 
         <!-- Right: Stop or Clear Button -->
-        <div class="flex shrink-0 gap-2 items-end justify-end mt-2 sm:mt-0">
+        <div v-if="!props.autoStart" class="flex shrink-0 gap-2 items-end justify-end mt-2 sm:mt-0">
           <button
             v-if="isTyping"
             @click="stopTyping"
@@ -437,5 +503,15 @@ defineExpose({ askQuestion });
   background: none;
   padding: 0;
   color: inherit;
+}
+
+/* Make OCR markdown output look distinct */
+.prose-assistant :deep(pre) {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px dashed rgba(16, 185, 129, 0.3);
+}
+
+.prose-assistant :deep(code) {
+  color: #065f46;
 }
 </style>
