@@ -210,6 +210,7 @@ const activeBboxes = computed(() => {
           <div class="flex min-h-0 flex-1 flex-col bg-white/40">
             <ChatPanel
               :questions="video.questions"
+              :isOcr="video.type === 'ocr'"
               :welcomeLabel="video.type === 'ocr' ? 'Ask the Image' : undefined"
               :ocrEntries="video.type === 'ocr' ? ocrEntries : undefined"
               :activeBboxKeys="video.type === 'ocr' ? activeBboxKeys : undefined"

@@ -14,6 +14,7 @@ interface ChatMessage {
 const props = defineProps<{
   questions: DemoQuestion[];
   autoStart?: boolean;
+  isOcr?: boolean;
   ocrEntries?: Array<{ id: string; text: string; bbox: string; rawLine: string }>;
   activeBboxKeys?: Set<string>;
   welcomeLabel?: string;
@@ -253,23 +254,30 @@ defineExpose({ askQuestion, resetChat });
               />
             </div>
 
-            <!-- OCR interactive mode: raw output with clickable entries -->
+            <!-- OCR interactive mode: raw output with clickable entries (after typing finishes) -->
             <div
-              v-if="ocrEntries && ocrEntries.length > 0 && !msg.isTyping"
-              class="prose-assistant max-w-none rounded-[1.5rem] rounded-tl-md border border-emerald-100 bg-white/95 px-7 py-5 text-gray-800 shadow-sm font-mono text-sm leading-loose"
+              v-if="props.isOcr && ocrEntries && ocrEntries.length > 0 && !msg.isTyping"
+              class="max-w-none rounded-[1.5rem] rounded-tl-md border border-emerald-100 bg-white/95 px-7 py-5 text-gray-800 shadow-sm font-mono text-sm leading-relaxed"
             >
               <div
                 v-for="entry in ocrEntries"
                 :key="entry.id"
                 @click="emit('bboxToggle', entry.id)"
-                class="cursor-pointer select-none py-0.5 transition-all hover:font-bold"
+                class="ocr-entry cursor-pointer select-none rounded-lg px-3 py-1.5 my-1 transition-all duration-150"
                 :class="activeBboxKeys?.has(entry.id)
-                  ? 'underline decoration-emerald-500 decoration-2 underline-offset-4'
-                  : 'italic'"
+                  ? 'bg-emerald-100 text-emerald-700 font-semibold shadow-sm ring-1 ring-emerald-300'
+                  : 'bg-gray-100/80 text-gray-700 shadow-[0_1px_2px_rgba(0,0,0,0.06)] hover:bg-gray-200/90 hover:shadow-md'"
+                :title="activeBboxKeys?.has(entry.id) ? 'Click to hide bbox' : 'Click to show bbox'"
               >{{ entry.rawLine }}</div>
             </div>
 
-            <!-- Regular markdown rendering (or during typing) -->
+            <!-- OCR raw text rendering (no markdown, used during typing and as fallback) -->
+            <div
+              v-else-if="props.isOcr"
+              class="max-w-none rounded-[1.5rem] rounded-tl-md border border-emerald-100 bg-white/95 px-7 py-5 text-gray-800 shadow-sm font-mono text-sm leading-relaxed whitespace-pre-wrap break-words"
+            >{{ msg.content }}</div>
+
+            <!-- Regular markdown rendering -->
             <div
               v-else
               class="prose-assistant max-w-none rounded-[1.5rem] rounded-tl-md border border-emerald-100 bg-white/95 px-7 py-5 text-[1.05rem] leading-[1.8] text-gray-800 shadow-sm"
