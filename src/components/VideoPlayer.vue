@@ -64,6 +64,43 @@ function getBBoxStyle(bboxStr: string) {
   }
 }
 
+function getCaptionPosition(bboxStr: string): { classes: string; style: Record<string, string> } {
+  try {
+    const coords = JSON.parse(bboxStr);
+    if (!Array.isArray(coords) || coords.length !== 4) return { classes: '', style: {} };
+    const [xmin, ymin, , ymax] = coords;
+
+    const nearTop = ymin < 40;
+    const nearLeft = xmin < 40;
+    const nearBottom = ymax > 960;
+
+    if (nearTop && !nearBottom) {
+      // Place caption at bottom-left of bbox (inside or below)
+      if (nearLeft) {
+        return {
+          classes: 'bottom-0 left-[-2px] translate-y-full border-t-0 border-2 border-emerald-500',
+          style: {}
+        };
+      }
+      return {
+        classes: 'bottom-0 left-[-2px] translate-y-full border-t-0 border-2 border-emerald-500',
+        style: {}
+      };
+    }
+
+    // Default: caption at top-left, above the bbox
+    return {
+      classes: 'top-0 left-[-2px] -translate-y-full border-b-0 border-2 border-emerald-500',
+      style: {}
+    };
+  } catch {
+    return {
+      classes: 'top-0 left-[-2px] -translate-y-full border-b-0 border-2 border-emerald-500',
+      style: {}
+    };
+  }
+}
+
 let resizeObserver: ResizeObserver | null = null;
 
 onMounted(() => {
@@ -101,7 +138,10 @@ onUnmounted(() => {
           class="absolute border-2 border-emerald-500"
           :style="getBBoxStyle(item.bbox)"
         >
-          <span class="bg-emerald-50 text-emerald-800 text-xs font-bold px-1 whitespace-nowrap absolute left-[-2px] top-0 -translate-y-full border-2 border-emerald-500 border-b-0 leading-tight shadow-sm">
+          <span
+            class="bg-emerald-50 text-emerald-800 text-xs font-bold px-1 whitespace-nowrap absolute leading-tight shadow-sm"
+            :class="getCaptionPosition(item.bbox).classes"
+          >
             {{ item.text }}
           </span>
         </div>

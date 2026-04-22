@@ -218,7 +218,7 @@ export const demos: DemoVideo[] = [
   {
     id: "animals-multi-image",
     title: "多图动物描述",
-    description: "这是一个对多张动物图片对比描述的展示样例",
+    description: "这是一个对多张动物图片对比描述的展示样例。",
     type: "multi-image",
     imageUrls: [
       hfUrl("cat.png"),
